@@ -10,8 +10,10 @@ class BrandElement extends ElementBase implements BrandElementInterface {
     return $this;
   }
 
-  public function generateXMLElement() {
-    // TODO: Implement generateXMLElement() method.
+  public function generateXMLArray() {
+    $element = parent::generateXMLArray();
+    $element['#name'] = 'Brand';
+    return $element;
   }
 
 }

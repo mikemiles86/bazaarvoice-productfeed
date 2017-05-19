@@ -48,7 +48,64 @@ class CategoryElement extends ElementBase implements CategoryElementInterface {
     }
   }
 
-  public function generateXMLElement() {
-    // TODO: Implement generateXMLElement() method.
+  public function generateXMLArray() {
+    $element = parent::generateXMLArray();
+    $element['#name'] = 'Category';
+    $element[] = $this->generatePageUrlXMLArray($this->page_url);
+
+    if ($this->parent_id) {
+      $element[] = $this->generateElementXMLArray('ParentExternalId', $this->parent_id);
+    }
+
+    if ($page_urls = $this->generatePageUrlsXMLArray()) {
+      $element[] = $page_urls;
+    }
+
+    if ($this->image_url) {
+      $element[] = $this->generateImageUrlXMLArray($this->image_url);
+    }
+
+    if ($image_urls = $this->generateImageUrlsXMLArray()) {
+      $elements[] = $image_urls;
+    }
+
+    return $element;
   }
+
+  private function generatePageUrlXMLArray($url, array $attributes = []) {
+    return $this->generateElementXMLArray('CategoryPageUrl', $url, $attributes);
+  }
+
+  private function generatePageUrlsXMLArray() {
+    $element = false;
+
+    if (!empty($this->page_urls)) {
+      $element = $this->generateElementXMLArray('CategoryPageUrls');
+
+      foreach ($this->page_urls as $locale => $url) {
+        $element[] = $this->generatePageUrlXMLArray($url, ['locale' => $locale]);
+      }
+    }
+
+    return $element;
+  }
+
+  private function generateImageUrlXMLArray($url, array $attributes = []) {
+    return $this->generateElementXMLArray('ImageUrl', $url, $attributes);
+  }
+
+  private function generateImageUrlsXMLArray() {
+    $element = false;
+
+    if (!empty($this->image_urls)) {
+      $element = $this->generateElementXMLArray('ImageUrls');
+
+      foreach ($this->image_urls as $locale => $url) {
+        $element[] = $this->generateImageUrlXMLArray($url, ['locale' => $locale]);
+      }
+    }
+
+    return $element;
+  }
+
 }

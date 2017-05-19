@@ -7,6 +7,19 @@ abstract class ElementBase implements ElementInterface {
   protected $external_id;
   protected $name;
   protected $names;
+  protected $removed;
+
+  public function getExternalId() {
+    return $this->external_id;
+  }
+
+  public function setRemoved($removed = TRUE) {
+    $this->removed = ($removed === TRUE ? TRUE:FALSE);
+  }
+
+  public function notRemoved() {
+    $this->removed = FALSE;
+  }
 
   public function setExternalId($external_id) {
     if ($this->checkValidExternalId($external_id)) {
@@ -25,6 +38,59 @@ abstract class ElementBase implements ElementInterface {
     if (is_string($name) && $this->checkValidLocale($locale)) {
       $this->names[$locale] = $name;
     }
+  }
+
+  public function generateXMLArray() {
+    $element = [];
+
+    if ($this->removed) {
+      $element['#attributes']['removed'] = 'true';
+    }
+
+    if ($this->external_id) {
+      $element[] = $this->generateElementXMLArray('ExternalId', $this->external_id);
+    }
+
+    if ($this->name) {
+      $element[] = $this->generateNameXMLArray($this->name);
+    }
+
+    if ($names = $this->generateNamesXMLArray()) {
+      $element[] = $names;
+    }
+
+    return $element;
+  }
+
+  public function generateElementXMLArray($name, $value = false, array $attributes = []) {
+    $element = [
+      '#name' => $name,
+    ];
+    if ($value !== false) {
+      $element['#value'] = $value;
+    }
+
+    if (!empty($attributes)) {
+      $element['#attributes'] = $attributes;
+    }
+
+    return $element;
+  }
+
+  private function generateNameXMLArray($name, array $attributes = []) {
+    return $this->generateElementXMLArray('Name', $name, $attributes);
+  }
+
+  private function generateNamesXMLArray() {
+    $element = false;
+    if (count($this->names) > 0) {
+      $element = $this->generateElementXMLArray('Names');
+
+      foreach ($this->names as $locale => $name) {
+        $element[] = $this->generateNameXMLArray($name, ['locale' => $locale]);
+      }
+    }
+    return $element;
   }
 
   private function checkValidExternalId($external_id) {

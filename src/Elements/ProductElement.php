@@ -117,7 +117,7 @@ class ProductElement extends ElementBase implements ProductElementInterface {
     }
   }
 
-  public function generateXMLElement() {
+  public function generateXMLArray() {
     // TODO: Implement generateXMLElement() method.
   }
 
