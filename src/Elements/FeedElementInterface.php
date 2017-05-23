@@ -1,7 +1,7 @@
 <?php
 namespace BazaarvoiceProductFeed\Elements;
 
-interface FeedElementInterface extends ElementBase {
+interface FeedElementInterface extends ElementInterface {
 
   public function setIncremental($incremental = TRUE);
 

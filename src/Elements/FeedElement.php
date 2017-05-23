@@ -17,60 +17,67 @@ class FeedElement extends ElementBase implements FeedElementInterface {
   }
 
   public function setIncremental($incremental = TRUE) {
-    $this->incremental = $incremental ? TRUE:FALSE:
+    $this->incremental = $incremental ? TRUE:FALSE;
+    return $this;
   }
 
   public function addProduct(ProductElementInterface $product) {
     $this->products[$product->getExternalId()] = $product;
+    return $this;
   }
 
   public function addBrand(BrandElementInterface $brand) {
     $this->brands[$brand->getExternalId()] = $brand;
+    return $this;
   }
 
   public function addCategory(CategoryElementInterface $category) {
     $this->categories[$category->getExternalId()] = $category;
+    return $this;
   }
 
   public function addProducts(array $products) {
     foreach ($products as $product) {
       $this->addProduct($product);
     }
+    return $this;
   }
 
   public function addBrands(array $brands) {
     foreach ($brands as $brand) {
       $this->addBrand($brand);
     }
+    return $this;
   }
 
   public function addCategories(array $categories) {
     foreach ($categories as $category) {
       $this->addCategory($category);
     }
+    return $this;
   }
 
   public function generateXMLArray() {
 
-    $attributes = [
+    $element = [
+      '#attributes' => [
         'xmlns' => 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/' . self::$apiVersion,
         'name' => $this->name,
         'incremental' => $this->incremental ? 'true' : 'false',
         'extractDate' => date('Y-m-d') . 'T' . date('H:i:s'),
+        ],
       ];
 
-    $element = $this->generateElementXMLArray('Feed', false, $attributes);
-
     if ($brands = $this->generateBrandsXMLArray()) {
-      $element[] = $brands;
+      $element['#children'][] = $brands;
     }
 
     if ($categories = $this->generateCategoriesXMLArray()) {
-      $element[] = $categories
+      $element['#children'][] = $categories;
     }
 
     if ($products = $this->generateProductsXMLArray()) {
-      $element[] = $products;
+      $element['#children'][] = $products;
     }
 
     return $element;
@@ -82,7 +89,7 @@ class FeedElement extends ElementBase implements FeedElementInterface {
     if (count($this->brands) > 0) {
       $element = $this->generateElementXMLArray('Brands');
       foreach ($this->brands as $brand) {
-        $element[] = $brand->generateXMLArray();
+        $element['#children'][] = $brand->generateXMLArray();
       }
     }
 
@@ -95,7 +102,7 @@ class FeedElement extends ElementBase implements FeedElementInterface {
     if (count($this->categories) > 0) {
       $element = $this->generateElementXMLArray('Categories');
       foreach ($this->categories as $category) {
-        $element[] = $category->generateXMLArray();
+        $element['#children'][] = $category->generateXMLArray();
       }
     }
 
@@ -108,7 +115,7 @@ class FeedElement extends ElementBase implements FeedElementInterface {
     if (count($this->products) > 0) {
       $element = $this->generateElementXMLArray('Products');
       foreach ($this->products as $product) {
-        $element[] = $product->generateXMLArray();
+        $element['#children'][] = $product->generateXMLArray();
       }
     }
 

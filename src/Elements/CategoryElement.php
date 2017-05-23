@@ -22,90 +22,58 @@ class CategoryElement extends ElementBase implements CategoryElementInterface {
     if ($this->checkValidExternalId($parent_id)) {
       $this->parent_id = $parent_id;
     }
+    return $this;
   }
 
   public function setPageUrl($url) {
     if ($this->checkValidUrl($url)) {
       $this->page_url = $url;
     }
+    return $this;
   }
 
   public function setImageUrl($url) {
     if ($this->checkValidUrl($url)) {
       $this->image_url = $url;
     }
+    return $this;
   }
 
   public function addPageUrl($url, $locale) {
     if ($this->checkValidUrl($url) && $this->checkValidLocale($locale)) {
       $this->page_urls[$locale] = $url;
     }
+    return $this;
   }
 
   public function addImageUrl($url, $locale) {
     if ($this->checkValidUrl($url) && $this->checkValidLocale($locale)) {
       $this->image_urls[$locale] = $url;
     }
+    return $this;
   }
 
   public function generateXMLArray() {
     $element = parent::generateXMLArray();
     $element['#name'] = 'Category';
-    $element[] = $this->generatePageUrlXMLArray($this->page_url);
+    $element['#children'][] = $this->generateElementXMLArray('CategoryPageUrl', $this->page_url);
 
     if ($this->parent_id) {
-      $element[] = $this->generateElementXMLArray('ParentExternalId', $this->parent_id);
+      $element['#children'][] = $this->generateElementXMLArray('ParentExternalId', $this->parent_id);
     }
 
-    if ($page_urls = $this->generatePageUrlsXMLArray()) {
-      $element[] = $page_urls;
+    if (!empty($this->page_urls)) {
+      $element['#children'][] = $this->generateLocaleElementsXMLArray('CategoryPageUrls', 'CategoryPageUrl', $this->page_urls);
     }
 
     if ($this->image_url) {
-      $element[] = $this->generateImageUrlXMLArray($this->image_url);
+      $element['#children'][] = $this->generateElementXMLArray('ImageUrl', $this->image_url);
     }
-
-    if ($image_urls = $this->generateImageUrlsXMLArray()) {
-      $elements[] = $image_urls;
-    }
-
-    return $element;
-  }
-
-  private function generatePageUrlXMLArray($url, array $attributes = []) {
-    return $this->generateElementXMLArray('CategoryPageUrl', $url, $attributes);
-  }
-
-  private function generatePageUrlsXMLArray() {
-    $element = false;
-
-    if (!empty($this->page_urls)) {
-      $element = $this->generateElementXMLArray('CategoryPageUrls');
-
-      foreach ($this->page_urls as $locale => $url) {
-        $element[] = $this->generatePageUrlXMLArray($url, ['locale' => $locale]);
-      }
-    }
-
-    return $element;
-  }
-
-  private function generateImageUrlXMLArray($url, array $attributes = []) {
-    return $this->generateElementXMLArray('ImageUrl', $url, $attributes);
-  }
-
-  private function generateImageUrlsXMLArray() {
-    $element = false;
 
     if (!empty($this->image_urls)) {
-      $element = $this->generateElementXMLArray('ImageUrls');
-
-      foreach ($this->image_urls as $locale => $url) {
-        $element[] = $this->generateImageUrlXMLArray($url, ['locale' => $locale]);
-      }
+      $element['#children'][] = $this->generateLocaleElementsXMLArray('ImageUrls', 'ImageUrl', $this->image_urls);
     }
 
     return $element;
   }
-
 }

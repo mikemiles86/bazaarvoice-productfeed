@@ -15,16 +15,14 @@ abstract class ElementBase implements ElementInterface {
 
   public function setRemoved($removed = TRUE) {
     $this->removed = ($removed === TRUE ? TRUE:FALSE);
-  }
-
-  public function notRemoved() {
-    $this->removed = FALSE;
+    return $this;
   }
 
   public function setExternalId($external_id) {
     if ($this->checkValidExternalId($external_id)) {
       $this->external_id = $external_id;
     }
+    return $this;
   }
 
   public function setName($name) {
@@ -32,12 +30,15 @@ abstract class ElementBase implements ElementInterface {
       $this->name = $name;
     }
     else throw new \ErrorException('Name must be a string.');
+
+    return $this;
   }
 
   public function addName($name, $locale) {
     if (is_string($name) && $this->checkValidLocale($locale)) {
       $this->names[$locale] = $name;
     }
+    return $this;
   }
 
   public function generateXMLArray() {
@@ -48,15 +49,15 @@ abstract class ElementBase implements ElementInterface {
     }
 
     if ($this->external_id) {
-      $element[] = $this->generateElementXMLArray('ExternalId', $this->external_id);
+      $element['#children'][] = $this->generateElementXMLArray('ExternalId', $this->external_id);
     }
 
     if ($this->name) {
-      $element[] = $this->generateNameXMLArray($this->name);
+      $element['#children'][] = $this->generateElementXMLArray('Name', $this->name);
     }
 
-    if ($names = $this->generateNamesXMLArray()) {
-      $element[] = $names;
+    if (!empty($this->names)) {
+      $lement['#children'][] = $this->generateLocaleElementsXMLArray('Names', 'Name', $this->names);
     }
 
     return $element;
@@ -77,23 +78,35 @@ abstract class ElementBase implements ElementInterface {
     return $element;
   }
 
-  private function generateNameXMLArray($name, array $attributes = []) {
-    return $this->generateElementXMLArray('Name', $name, $attributes);
-  }
-
-  private function generateNamesXMLArray() {
+  public function generateMultipleElementsXMLArray($multiple_name, $single_name, array $elements = []) {
     $element = false;
-    if (count($this->names) > 0) {
-      $element = $this->generateElementXMLArray('Names');
 
-      foreach ($this->names as $locale => $name) {
-        $element[] = $this->generateNameXMLArray($name, ['locale' => $locale]);
+    if (!empty($elements)) {
+      $element = $this->generateElementXMLArray($multiple_name);
+
+      foreach ($elements as $value) {
+        $element['#children'][] = $this->generateElementXMLArray($single_name, $value);
       }
     }
+
     return $element;
   }
 
-  private function checkValidExternalId($external_id) {
+  public function generateLocaleElementsXMLArray($multiple_name, $single_name, array $locale_elements = []) {
+    $element = false;
+
+    if (!empty($locale_elements)) {
+      $element = $this->generateElementXMLArray($multiple_name);
+
+      foreach ($locale_elements as $locale => $value) {
+        $element['#children'][] = $this->generateElementXMLArray($single_name, $element, ['locale' => $locale]);
+      }
+    }
+
+    return $element;
+  }
+
+  public function checkValidExternalId($external_id) {
     $valid = FALSE;
     if (is_string($external_id) && preg_match('/^[[:alnum:]|\*|\-|\.|\_]+$/', $external_id)) {
       $valid = TRUE;
@@ -104,18 +117,18 @@ underscore (_)');
     return $valid;
   }
 
-  private function checkValidUrl($url) {
+  public function checkValidUrl($url) {
     $valid = FALSE;
 
     if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
       $valid = TRUE;
     }
-    else throw new \ErrorException('Invalid URL.')
+    else throw new \ErrorException('Invalid URL.');
 
     return $valid;
   }
 
-  private function checkValidLocale($locale) {
+  public function checkValidLocale($locale) {
     $valid = FALSE;
     if (is_string($locale) && preg_match('/^[a-z]{2}\_[A-Z]{2}$/', $locale)) {
       $valid = TRUE;
