@@ -85,7 +85,7 @@ $feed_element = $productFeed->newFeed('my_feed');
 // ...
 
 $brand_element = $productFeed->newBrand('my_brand', 'My Brand');
-$feed_element->addCBrand($brand_element);
+$feed_element->addBrand($brand_element);
 
 $more_brands = [];
 
