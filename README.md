@@ -130,7 +130,7 @@ $feed_element = $productFeed->newFeed('my_feed');
 
 // ... add products, brands & categories ...
 
-if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir'm 'my_feed_XYZ') {  
+if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ') {  
   try {
     $productFeed->sendFeed($feed_file, $sftp_username, $sftp_password);
   } catch (\Exception $e) {
