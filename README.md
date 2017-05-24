@@ -4,7 +4,7 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/bazaarvoice-productfeed/api.svg?style=flat-square)](https://packagist.org/packages/mikemiles86/bazaarvoice-productfeed)
 
-A PHP library for generating and sFTPing XML []Bazaarvoice ProductFeeds](http://labsbp-docsportal.aws.bazaarvoice.com/DataFeeds/Introduction/IntroductionDataFeeds_con.html).
+A PHP library for generating and sFTPing XML [Bazaarvoice ProductFeeds](http://labsbp-docsportal.aws.bazaarvoice.com/DataFeeds/Introduction/IntroductionDataFeeds_con.html).
 
 ## Install
 
