@@ -2,15 +2,47 @@
 
 namespace BazaarvoiceProductFeed\Elements;
 
+/**
+ * Class FeedElement
+ * @package BazaarvoiceProductFeed\Elements
+ */
 class FeedElement extends ElementBase implements FeedElementInterface {
 
+  /**
+   * @var string
+   */
   protected static $apiVersion = '5.6';
+
+  /**
+   * @var array
+   */
   protected $products;
+
+  /**
+   * @var array
+   */
   protected $brands;
+
+  /**
+   * @var array
+   */
   protected $categories;
+
+  /**
+   * @var bool
+   */
   protected $incremental;
 
+  /**
+   * FeedElement constructor.
+   * @param string $name
+   *   Feed name
+   *
+   * @param bool $incremental
+   *   Boolean TRUE or FALSE if is an incremental feedElement.
+   */
   public function __construct($name, $incremental = FALSE) {
+    // See: ElementBase::setName().
     $this->setName($name);
     $this->setIncremental($incremental);
     return $this;
@@ -58,7 +90,7 @@ class FeedElement extends ElementBase implements FeedElementInterface {
   }
 
   public function generateXMLArray() {
-
+    // Build rool XML element, with only Attributes.
     $element = [
       '#attributes' => [
         'xmlns' => 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/' . self::$apiVersion,
@@ -68,27 +100,42 @@ class FeedElement extends ElementBase implements FeedElementInterface {
         ],
       ];
 
+    // Get brands array if brands have been added.
     if ($brands = $this->generateBrandsXMLArray()) {
+      // Add as element children.
       $element['#children'][] = $brands;
     }
 
+    // Get categories array if categories have been added.
     if ($categories = $this->generateCategoriesXMLArray()) {
+      // Add as element children.
       $element['#children'][] = $categories;
     }
 
+    // Get products array if products have been added.
     if ($products = $this->generateProductsXMLArray()) {
+      // Add as element children.
       $element['#children'][] = $products;
     }
 
     return $element;
   }
 
+  /**
+   * If brands have been added, generate their XML arrays.
+   *
+   * @return array|bool
+   *   XML element array or boolean FALSE.
+   */
   private function generateBrandsXMLArray() {
     $element = false;
-
+    // Have brands?
     if (count($this->brands) > 0) {
+      // Generate root 'Brands' element.
       $element = $this->generateElementXMLArray('Brands');
+      // Loop through each brand.
       foreach ($this->brands as $brand) {
+        // Add XML array as child to Brands element.
         $element['#children'][] = $brand->generateXMLArray();
       }
     }
@@ -96,12 +143,21 @@ class FeedElement extends ElementBase implements FeedElementInterface {
     return $element;
   }
 
+  /**
+   * If categories have been added, generate their XML arrays.
+   *
+   * @return array|bool
+   *   XML element array or boolean FALSE.
+   */
   private function generateCategoriesXMLArray() {
     $element = false;
-
+    // Have categories?
     if (count($this->categories) > 0) {
+      // Generate root 'Categories' element.
       $element = $this->generateElementXMLArray('Categories');
+      // Loop through each category.
       foreach ($this->categories as $category) {
+        // Add XML array as child to Categories element.
         $element['#children'][] = $category->generateXMLArray();
       }
     }
@@ -109,12 +165,21 @@ class FeedElement extends ElementBase implements FeedElementInterface {
     return $element;
   }
 
+  /**
+   * If products have been added, generate their XML arrays.
+   *
+   * @return array|bool
+   *   XML element array or boolean FALSE.
+   */
   private function generateProductsXMLArray() {
     $element = false;
-
+    // Have products?
     if (count($this->products) > 0) {
+      // Generate root 'Products' element.
       $element = $this->generateElementXMLArray('Products');
+      // Loop through each product.
       foreach ($this->products as $product) {
+        // Add XML array as child to Products element.
         $element['#children'][] = $product->generateXMLArray();
       }
     }

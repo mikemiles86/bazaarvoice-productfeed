@@ -4,6 +4,10 @@ namespace BazaarvoiceProductFeed;
 
 use BazaarvoiceProductFeed\Elements\FeedElementInterface;
 
+/**
+ * Interface ProductFeedInterface
+ * @package BazaarvoiceProductFeed
+ */
 interface ProductFeedInterface {
 
   /**
