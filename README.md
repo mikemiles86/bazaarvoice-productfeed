@@ -38,7 +38,7 @@ $feed_element->addProduct($product_element);
 $more_products = [];
 
 $second_product = $productFeed->newProduct('second_product', 'Second Product', 'product_category_456', 'htttp://www.example.com/second-product', 'http://www.example.com/images/second-product.jpg');
-  ->setDescription('This is my second product)
+  ->setDescription('This is my second product')
   ->addPageUrl('http://www.example.es/second-product', 'es_SP')
   ->setBrandId('my_brand_123')
   ->addUPC('012345');
