@@ -21,11 +21,24 @@ $ composer require mikemiles86/bazaarvoice-productfeed
 $productFeed = new \BazaarvoiceProductFeed\ProductFeed();
 ```
 
-#### Creating a feedElement
+### Creating a feedElement
 ``` php
 $productFeed = new \BazaarvoiceProductFeed\ProductFeed();
 $feed_element = $productFeed->newFeed('my_feed');
 ```
+
+### Creating an Incremental feed.
+``` php
+$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
+$feed_element = $productFeed->newFeed('my_feed', TRUE);
+```
+
+``` php
+$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
+$feed_element = $productFeed->newFeed('my_feed')
+  ->setIncremental(TRUE);
+```
+
 
 ### Creating products and adding them to a feed.
 ``` php
@@ -101,7 +114,7 @@ $feed_element->addBrands($more_brands);
 
 ```
 
-## Print ProductFeed XML string
+### Print ProductFeed XML string
 ``` php
 $productFeed = new \BazaarvoiceProductFeed\ProductFeed();
 $feed_element = $productFeed->newFeed('my_feed');
@@ -122,7 +135,7 @@ $feed_element = $productFeed->newFeed('my_feed');
 $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ');
 ```
 
-### SFTP ProductFeed to Bazaarvoice.
+### SFTP ProductFeed to Bazaarvoice Production.
 ``` php
 
 $productFeed = new \BazaarvoiceProductFeed\ProductFeed();
@@ -139,6 +152,25 @@ if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_X
 }
 
 ```
+
+#### SFTP ProductFeed to Bazaarvoice Staging.
+``` php
+
+$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
+$feed_element = $productFeed->newFeed('my_feed');
+
+// ... add products, brands & categories ...
+
+if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ') {  
+  try {
+    $productFeed->useStage()->sendFeed($feed_file, $sftp_username, $sftp_password);
+  } catch (\Exception $e) {
+    // Failed to FTP feed file.
+  }
+}
+
+```
+
 
 ## Testing
 
