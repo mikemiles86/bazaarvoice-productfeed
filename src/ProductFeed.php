@@ -125,7 +125,7 @@ class ProductFeed implements ProductFeedInterface {
       }
       if (!$file_sent && function_exists('file_put_contents')) {
         // Else attempt file_put_contents.
-        if (file_put_contents('ssh2.sftp://' . $sftp_host . ':' . $sftp_port . $sftp_filepath, file_get_contents($file_path))) {
+        if (file_put_contents('sftp://' . $sftp_host . ':' . $sftp_port . $sftp_filepath, file_get_contents($file_path))) {
           $file_sent = TRUE;
         }
       }
