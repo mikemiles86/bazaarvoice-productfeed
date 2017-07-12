@@ -105,26 +105,30 @@ class ProductFeed implements ProductFeedInterface {
     $sftp_filepath = $sftp_directory . '/' . basename($file_path);
 
     try {
-      // Create an ssh connection.
-      $connection = ssh2_connect($sftp_host, $sftp_port);
-      // Attempt to authenticate.
-      ssh2_auth_password($connection, $sftp_username, $sftp_password);
-      // Create an sftp connection.
-      $sftp = ssh2_sftp($connection);
-      // Get full remote path.
-      $remote_dir = ssh2_sftp_realpath($sftp, ".");
-      // Open up a file stream for writing.
-      $stream = fopen('ssh2.sftp://' . $sftp . $remote_dir . $sftp_filepath, 'w');
-      // Attempt to write to stream.
-      if (fwrite($stream, file_get_contents($file_path))) {
-        $file_sent = TRUE;
+      if (function_exists('ssh2_connect')) {
+        // Create an ssh connection.
+        $connection = ssh2_connect($sftp_host, $sftp_port);
+        // Attempt to authenticate.
+        ssh2_auth_password($connection, $sftp_username, $sftp_password);
+        // Create an sftp connection.
+        $sftp = ssh2_sftp($connection);
+        // Get full remote path.
+        $remote_dir = ssh2_sftp_realpath($sftp, ".");
+        // Open up a file stream for writing.
+        $stream = fopen('ssh2.sftp://' . $sftp . $remote_dir . $sftp_filepath, 'w');
+        // Attempt to write to stream.
+        if (fwrite($stream, file_get_contents($file_path))) {
+          $file_sent = TRUE;
+        }
+        // Close file stream.
+        fclose($stream);
       }
-      // Else attempt file_put_contents.
-      elseif (file_put_contents('ssh2.sftp://' . $sftp . '/' . $remote_dir . $sftp_filepath, file_get_contents($file_path))) {
-        $file_sent = TRUE;
+      if (!$file_sent && function_exists('file_put_contents')) {
+        // Else attempt file_put_contents.
+        if (file_put_contents('ssh2.sftp://' . $sftp . '/' . $remote_dir . $sftp_filepath, file_get_contents($file_path))) {
+          $file_sent = TRUE;
+        }
       }
-      // Close file stream.
-      fclose($stream);
     }
     // Capture what went wrong.
     catch (\Exception $e) {
