@@ -104,8 +104,15 @@ class ProductFeed implements ProductFeedInterface {
     // Build full remote path of where to save file.
     $sftp_filepath = $sftp_directory . '/' . basename($file_path);
 
+    $contents_context = [
+      'ssl' => [
+        "verify_peer" => false,
+        "verify_peer_name" => false,
+      ]
+    ];
+
     try {
-      if ($contents = file_get_contents($file_path)) {
+      if ($contents = file_get_contents($file_path, FALSE, $contents_context)) {
         if (function_exists('ssh2_connect')) {
           // Create an ssh connection.
           $connection = ssh2_connect($sftp_host, $sftp_port);
