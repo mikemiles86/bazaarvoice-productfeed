@@ -111,8 +111,11 @@ class ProductFeed implements ProductFeedInterface {
       ]
     ];
 
+    // Create a stream context to deal with SSL.
+    $context = stream_context_create($contents_context);
+
     try {
-      if ($contents = file_get_contents($file_path, FALSE, $contents_context)) {
+      if ($contents = file_get_contents($file_path, FALSE, $context)) {
         if (function_exists('ssh2_connect')) {
           // Create an ssh connection.
           $connection = ssh2_connect($sftp_host, $sftp_port);
