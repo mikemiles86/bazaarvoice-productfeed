@@ -133,11 +133,13 @@ class ProductFeed implements ProductFeedInterface {
           }
           // Close file stream.
           fclose($stream);
-        }
-        if (!$file_sent && function_exists('file_put_contents')) {
-          // Else attempt file_put_contents.
-          if (file_put_contents('sftp://' . $sftp_host . ':' . $sftp_port . $sftp_filepath, $contents)) {
-            $file_sent = TRUE;
+
+          if (!$file_sent && function_exists('file_put_contents')) {
+            // Else attempt file_put_contents.
+            $sftp_path = 'ssh2.sftp://' . $sftp_username . ':' .$sftp_password . '@' . $sftp_host . $sftp_filepath;
+            if (file_put_contents($sftp_path, $contents)) {
+              $file_sent = TRUE;
+            }
           }
         }
       }
