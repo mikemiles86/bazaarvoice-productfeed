@@ -319,8 +319,12 @@ class ProductElement extends ElementBase implements ProductElementInterface {
       foreach ($custom_attributes as $attribute_id => $attribute_values) {
         // Loop through all values for this attribute.
         foreach ($attribute_values as $value) {
-          // Add basic element with value and id attribute.
-          $element['#children'][] = $this->generateElementXMLArray('Attribute', $value, ['id' => $attribute_id]);
+          // Add basic element with id attribute.
+          $attribute = $this->generateElementXMLArray('Attribute', FALSE, ['id' => $attribute_id]);
+          // Add Value as child of attribute.
+          $attribute['#children'][] = $this->generateElementXMLArray('Value', $value);
+          // Add to Attributes array.
+          $element['#children'][] = $attribute;
         }
       }
     }
