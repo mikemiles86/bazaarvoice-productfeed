@@ -98,7 +98,7 @@ abstract class ElementBase implements ElementInterface {
 
     // Value being passed? set value attribute.
     if ($value !== false) {
-      $element['#value'] = $value;
+      $element['#value'] = htmlspecialchars($value);
     }
 
     // Additional XML attributes being passed? set attributes.
