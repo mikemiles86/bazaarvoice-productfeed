@@ -84,12 +84,12 @@ class ProductFeed implements ProductFeedInterface {
         $directory = rtrim($directory, '/\\');
         // Does directory exists and is it writable?
         if (is_dir($directory) && is_writable($directory)) {
-            // build filepath string.
-            $file_path = $directory . '/' . $filename . '.xml.gz';
-            // Attempt to save the contents.
-            if (file_put_contents($file_path, $file)) {
-              $saved = $file_path;
-            }
+          // build filepath string.
+          $file_path = $directory . '/' . $filename . '.xml.gz';
+          // Attempt to save the contents.
+          if (file_put_contents($file_path, $file)) {
+            $saved = $file_path;
+          }
         }
       }
     }
@@ -125,15 +125,25 @@ class ProductFeed implements ProductFeedInterface {
           $sftp = ssh2_sftp($connection);
           // Get full remote path.
           $remote_dir = ssh2_sftp_realpath($sftp, ".");
-          // Open up a file stream for writing.
-          $stream = fopen('ssh2.sftp://' . $sftp . $remote_dir . $sftp_filepath, 'w');
-          // Attempt to write to stream.
-          if (fwrite($stream, $contents)) {
-            $file_sent = TRUE;
-          }
-          // Close file stream.
-          fclose($stream);
 
+          // Attempt to send file.
+          if (function_exists('ssh2_scp_send')) {
+            if (ssh2_scp_send($connection, $file_path, $sftp_filepath)) {
+              $file_sent = TRUE;
+            }
+          }
+
+          // Attempt to stream file. Open up a file stream for writing.
+          if (!$file_sent && ($stream = fopen('ssh2.sftp://' . $sftp_host . $sftp_filepath, 'wb'))) {
+            // Attempt to write to stream.
+            if (fwrite($stream, $contents)) {
+              $file_sent = TRUE;
+            }
+            // Close file stream.
+            fclose($stream);
+          }
+
+          // Attempt to put file.
           if (!$file_sent && function_exists('file_put_contents')) {
             // Else attempt file_put_contents.
             $sftp_path = 'ssh2.sftp://' . $sftp_username . ':' .$sftp_password . '@' . $sftp_host . $sftp_filepath;
@@ -144,7 +154,7 @@ class ProductFeed implements ProductFeedInterface {
         }
       }
     }
-    // Capture what went wrong.
+      // Capture what went wrong.
     catch (\Exception $e) {
       $file_sent = $e->getMessage();
     }
@@ -152,15 +162,15 @@ class ProductFeed implements ProductFeedInterface {
     return $file_sent;
   }
 
-/**
- * Generate and return a  SimpleXMLElement object for the product feed
- *
- * @param \BazaarvoiceProductFeed\Elements\FeedElementInterface $feed
- *   Bazaarvoice FeedElement Object
- *
- * @return \SimpleXMLElement
- *   Simple XML object
- */
+  /**
+   * Generate and return a  SimpleXMLElement object for the product feed
+   *
+   * @param \BazaarvoiceProductFeed\Elements\FeedElementInterface $feed
+   *   Bazaarvoice FeedElement Object
+   *
+   * @return \SimpleXMLElement
+   *   Simple XML object
+   */
   private function generateFeedXML(FeedElementInterface $feed) {
     // Create a new SimpleXML element object.
     $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><Feed></Feed>');
@@ -171,14 +181,14 @@ class ProductFeed implements ProductFeedInterface {
     return $xml;
   }
 
-/**
- * Recursive function to build SimpleXMLElements.
- *
- * @param \SimpleXMLElement $xml
- *   SimpleXML Object. Passed by reference.
- * @param array $element
- *   Product feed XML Element array to add to SimpleXML
- */
+  /**
+   * Recursive function to build SimpleXMLElements.
+   *
+   * @param \SimpleXMLElement $xml
+   *   SimpleXML Object. Passed by reference.
+   * @param array $element
+   *   Product feed XML Element array to add to SimpleXML
+   */
   private function buildXML(\SimpleXMLElement &$xml, array $element = []) {
 
     // Is there an element to add?
