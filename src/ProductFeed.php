@@ -126,15 +126,14 @@ class ProductFeed implements ProductFeedInterface {
           // Get full remote path.
           $remote_dir = ssh2_sftp_realpath($sftp, ".");
 
-          // Attempt to send file.
           if (function_exists('ssh2_scp_send')) {
-            if (ssh2_scp_send($connection, $file_path, $sftp_filepath)) {
+            if (ssh2_scp_send($connection, $file_path, $remote_dir . $sftp_filepath)) {
               $file_sent = TRUE;
             }
           }
 
           // Attempt to stream file. Open up a file stream for writing.
-          if (!$file_sent && ($stream = fopen('ssh2.sftp://' . $sftp_host . $sftp_filepath, 'wb'))) {
+          if (!$file_sent && ($stream = fopen('ssh2.sftp://' . $sftp_host . $remote_dir . $sftp_filepath, 'wb'))) {
             // Attempt to write to stream.
             if (fwrite($stream, $contents)) {
               $file_sent = TRUE;
@@ -146,7 +145,7 @@ class ProductFeed implements ProductFeedInterface {
           // Attempt to put file.
           if (!$file_sent && function_exists('file_put_contents')) {
             // Else attempt file_put_contents.
-            $sftp_path = 'ssh2.sftp://' . $sftp_username . ':' .$sftp_password . '@' . $sftp_host . $sftp_filepath;
+            $sftp_path = 'ssh2.sftp://' . $sftp_username . ':' .$sftp_password . '@' . $sftp_host . $remote_dir . $sftp_filepath;
             if (file_put_contents($sftp_path, $contents)) {
               $file_sent = TRUE;
             }
