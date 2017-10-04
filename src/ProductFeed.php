@@ -7,6 +7,7 @@ use BazaarvoiceProductFeed\Elements\CategoryElement;
 use BazaarvoiceProductFeed\Elements\FeedElement;
 use BazaarvoiceProductFeed\Elements\FeedElementInterface;
 use BazaarvoiceProductFeed\Elements\ProductElement;
+use phpseclib\Net\SFTP;
 
 /**
  * Class ProductFeed
@@ -97,66 +98,38 @@ class ProductFeed implements ProductFeedInterface {
     return $saved;
   }
 
-  public function sendFeed($file_path, $sftp_username, $sftp_password, $sftp_directory = '/import-box', $sftp_port = '22') {
+  public function sendFeed($file_path, $sftp_username, $sftp_password, $sftp_directory = 'import-inbox', $sftp_port = '22') {
     $file_sent = FALSE;
     // Build host string, depending if using stage or not.
     $sftp_host = 'sftp' . ($this->use_stage ? '-stg':'') . '.bazaarvoice.com';
-    // Build full remote path of where to save file.
-    $sftp_filepath = $sftp_directory . '/' . basename($file_path);
-
-    $contents_context = [
-      'ssl' => [
-        "verify_peer" => false,
-        "verify_peer_name" => false,
-      ]
-    ];
-
-    // Create a stream context to deal with SSL.
-    $context = stream_context_create($contents_context);
+    // Get filename.
+    $filename = basename($file_path);
+    // Create a new SFTP object using host and port.
+    $sftp = new SFTP($sftp_host, $sftp_port);
+    // Remove any extraneous slashes.
+    $sftp_directory = rtrim($sftp_directory, '/');
+    $sftp_directory = ltrim($sftp_directory, '/');
 
     try {
-      if ($contents = file_get_contents($file_path, FALSE, $context)) {
-        if (function_exists('ssh2_connect')) {
-          // Create an ssh connection.
-          $connection = ssh2_connect($sftp_host, $sftp_port);
-          // Attempt to authenticate.
-          ssh2_auth_password($connection, $sftp_username, $sftp_password);
-          // Create an sftp connection.
-          $sftp = ssh2_sftp($connection);
-          // Get full remote path.
-          $remote_dir = ssh2_sftp_realpath($sftp, ".");
-
-          if (function_exists('ssh2_scp_send')) {
-            if (ssh2_scp_send($connection, $file_path, $remote_dir . $sftp_filepath)) {
-              $file_sent = TRUE;
-            }
-          }
-
-          // Attempt to stream file. Open up a file stream for writing.
-          if (!$file_sent && ($stream = fopen('ssh2.sftp://' . $sftp_host . $remote_dir . $sftp_filepath, 'wb'))) {
-            // Attempt to write to stream.
-            if (fwrite($stream, $contents)) {
-              $file_sent = TRUE;
-            }
-            // Close file stream.
-            fclose($stream);
-          }
-
-          // Attempt to put file.
-          if (!$file_sent && function_exists('file_put_contents')) {
-            // Else attempt file_put_contents.
-            $sftp_path = 'ssh2.sftp://' . $sftp_username . ':' .$sftp_password . '@' . $sftp_host . $remote_dir . $sftp_filepath;
-            if (file_put_contents($sftp_path, $contents)) {
-              $file_sent = TRUE;
-            }
-          }
+      // Attempt to login with credentials.
+      if ($sftp->login($sftp_username, $sftp_password)) {
+        // Get full remote directory path.
+        $root_directory = $sftp->realpath(".");
+        $full_directory_path = $root_directory . ((substr($root_directory, -1) == '/') ? '' : '/') . $sftp_directory;
+        // Change to remote directory.
+        $sftp->chdir($full_directory_path);
+        // Attempt to upload the file.
+        if ($sftp->put($filename, $file_path, NET_SFTP_LOCAL_FILE)) {
+          // Successful upload.
+          $file_sent = TRUE;
         }
       }
     }
-      // Capture what went wrong.
+    // Capture what went wrong.
     catch (\Exception $e) {
       $file_sent = $e->getMessage();
     }
+
 
     return $file_sent;
   }
