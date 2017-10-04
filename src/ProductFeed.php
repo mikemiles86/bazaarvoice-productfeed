@@ -118,8 +118,8 @@ class ProductFeed implements ProductFeedInterface {
         $full_directory_path = $root_directory . ((substr($root_directory, -1) == '/') ? '' : '/') . $sftp_directory;
         // Change to remote directory.
         $sftp->chdir($full_directory_path);
-        // Attempt to upload the file.
-        if ($sftp->put($filename, $file_path, NET_SFTP_LOCAL_FILE)) {
+        // Attempt to upload the file contents.
+        if ($sftp->put($filename, file_get_contents($file_path, FALSE))) {
           // Successful upload.
           $file_sent = TRUE;
         }
