@@ -1,54 +1,37 @@
 <?php
+namespace BazaarVoice\Tests;
 
-namespace BazaarvoiceProductFeed\Tests;
-
-use BazaarvoiceProductFeed\ProductFeed;
+use BazaarVoice\ProductFeed;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamWrapper;
 
-/**
- * Class ProductFeedTest
- * @package BazaarvoiceProductFeed\Tests
- */
 class ProductFeedTest extends \PHPUnit_Framework_TestCase {
 
-  /**
-   * Test instantiation of FeedElement
-   */
   public function testNewFeedElement() {
     $pf = new ProductFeed();
     $name = substr( md5(rand()), 0, 8);
     $feed = $pf->newFeed($name);
-    $this->assertInstanceOf('BazaarvoiceProductFeed\Elements\FeedElementInterface', $feed);
+    $this->assertInstanceOf('BazaarVoice\Elements\FeedElementInterface', $feed);
   }
 
-  /**
-   * Test instantiation of BrandElement.
-   */
   public function testNewBrandElement() {
     $pf = new ProductFeed();
     $name = substr( md5(rand()), 0, 8);
     $id = 'test_brand';
     $brand = $pf->newBrand($id, $name);
-    $this->assertInstanceOf('BazaarvoiceProductFeed\Elements\BrandElementInterface', $brand);
+    $this->assertInstanceOf('BazaarVoice\Elements\BrandElementInterface', $brand);
   }
 
-  /**
-   * Test instantiation of CategoryElement.
-   */
   public function testNewCategoryElement() {
     $pf = new ProductFeed();
     $name = substr( md5(rand()), 0, 8);
     $id = 'test_category';
     $page_url = 'http://www.example.com/' . $id;
     $category = $pf->newCategory($id, $name, $page_url);
-    $this->assertInstanceOf('BazaarvoiceProductFeed\Elements\CategoryElement', $category);
+    $this->assertInstanceOf('BazaarVoice\Elements\CategoryElement', $category);
   }
 
-  /**
-   * Test instantiation of ProductElement.
-   */
   public function testNewProductElement() {
     $pf = new ProductFeed();
     $name = substr( md5(rand()), 0, 8);
@@ -56,7 +39,7 @@ class ProductFeedTest extends \PHPUnit_Framework_TestCase {
     $page_url = 'http://www.example.com/' . $id;
     $image_url = $page_url . '/' . $name . '.jpg';
     $product = $pf->newProduct($id, $name, 'test_category', $page_url, $image_url);
-    $this->assertInstanceOf('BazaarvoiceProductFeed\Elements\ProductElement', $product);
+    $this->assertInstanceOf('BazaarVoice\Elements\ProductElement', $product);
   }
 
   /**
