@@ -1,190 +1,162 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
-
-/**
- * Class FeedElement
- * @package BazaarvoiceProductFeed\Elements
- */
-class FeedElement extends ElementBase implements FeedElementInterface {
-
+class FeedElement extends ElementBase implements FeedElementInterface
+{
   /**
    * @var string
    */
-  protected static $apiVersion = '5.6';
+    protected static $apiVersion = '5.6';
 
   /**
    * @var array
    */
-  protected $products;
+    protected $products;
 
   /**
    * @var array
    */
-  protected $brands;
+    protected $brands;
 
   /**
    * @var array
    */
-  protected $categories;
+    protected $categories;
 
   /**
    * @var bool
    */
-  protected $incremental;
+    protected $incremental;
 
-  /**
-   * FeedElement constructor.
-   * @param string $name
-   *   Feed name
-   *
-   * @param bool $incremental
-   *   Boolean TRUE or FALSE if is an incremental feedElement.
-   */
-  public function __construct($name, $incremental = FALSE) {
-    // See: ElementBase::setName().
-    $this->setName($name);
-    $this->setIncremental($incremental);
-    return $this;
-  }
-
-  public function setIncremental($incremental = TRUE) {
-    $this->incremental = $incremental ? TRUE:FALSE;
-    return $this;
-  }
-
-  public function addProduct(ProductElementInterface $product) {
-    $this->products[$product->getExternalId()] = $product;
-    return $this;
-  }
-
-  public function addBrand(BrandElementInterface $brand) {
-    $this->brands[$brand->getExternalId()] = $brand;
-    return $this;
-  }
-
-  public function addCategory(CategoryElementInterface $category) {
-    $this->categories[$category->getExternalId()] = $category;
-    return $this;
-  }
-
-  public function addProducts(array $products) {
-    foreach ($products as $product) {
-      $this->addProduct($product);
-    }
-    return $this;
-  }
-
-  public function addBrands(array $brands) {
-    foreach ($brands as $brand) {
-      $this->addBrand($brand);
-    }
-    return $this;
-  }
-
-  public function addCategories(array $categories) {
-    foreach ($categories as $category) {
-      $this->addCategory($category);
-    }
-    return $this;
-  }
-
-  public function generateXMLArray() {
-    // Build rool XML element, with only Attributes.
-    $element = [
-      '#attributes' => [
-        'xmlns' => 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/' . self::$apiVersion,
-        'name' => $this->name,
-        'incremental' => $this->incremental ? 'true' : 'false',
-        'extractDate' => date('Y-m-d') . 'T' . date('H:i:s'),
-        ],
-      ];
-
-    // Get brands array if brands have been added.
-    if ($brands = $this->generateBrandsXMLArray()) {
-      // Add as element children.
-      $element['#children'][] = $brands;
+    public function __construct(string $name, bool $incremental = false)
+    {
+        $this->setName($name);
+        $this->setIncremental($incremental);
+        return $this;
     }
 
-    // Get categories array if categories have been added.
-    if ($categories = $this->generateCategoriesXMLArray()) {
-      // Add as element children.
-      $element['#children'][] = $categories;
+    public function setIncremental(bool $incremental = true): FeedElementInterface
+    {
+        $this->incremental = $incremental;
+        return $this;
     }
 
-    // Get products array if products have been added.
-    if ($products = $this->generateProductsXMLArray()) {
-      // Add as element children.
-      $element['#children'][] = $products;
+    public function addProduct(ProductElementInterface $product): FeedElementInterface
+    {
+        $this->products[$product->getExternalId()] = $product;
+        return $this;
     }
 
-    return $element;
-  }
-
-  /**
-   * If brands have been added, generate their XML arrays.
-   *
-   * @return array|bool
-   *   XML element array or boolean FALSE.
-   */
-  private function generateBrandsXMLArray() {
-    $element = false;
-    // Have brands?
-    if (count($this->brands) > 0) {
-      // Generate root 'Brands' element.
-      $element = $this->generateElementXMLArray('Brands');
-      // Loop through each brand.
-      foreach ($this->brands as $brand) {
-        // Add XML array as child to Brands element.
-        $element['#children'][] = $brand->generateXMLArray();
-      }
+    public function addBrand(BrandElementInterface $brand): FeedElementInterface
+    {
+        $this->brands[$brand->getExternalId()] = $brand;
+        return $this;
     }
 
-    return $element;
-  }
-
-  /**
-   * If categories have been added, generate their XML arrays.
-   *
-   * @return array|bool
-   *   XML element array or boolean FALSE.
-   */
-  private function generateCategoriesXMLArray() {
-    $element = false;
-    // Have categories?
-    if (count($this->categories) > 0) {
-      // Generate root 'Categories' element.
-      $element = $this->generateElementXMLArray('Categories');
-      // Loop through each category.
-      foreach ($this->categories as $category) {
-        // Add XML array as child to Categories element.
-        $element['#children'][] = $category->generateXMLArray();
-      }
+    public function addCategory(CategoryElementInterface $category): FeedElementInterface
+    {
+        $this->categories[$category->getExternalId()] = $category;
+        return $this;
     }
 
-    return $element;
-  }
-
-  /**
-   * If products have been added, generate their XML arrays.
-   *
-   * @return array|bool
-   *   XML element array or boolean FALSE.
-   */
-  private function generateProductsXMLArray() {
-    $element = false;
-    // Have products?
-    if (count($this->products) > 0) {
-      // Generate root 'Products' element.
-      $element = $this->generateElementXMLArray('Products');
-      // Loop through each product.
-      foreach ($this->products as $product) {
-        // Add XML array as child to Products element.
-        $element['#children'][] = $product->generateXMLArray();
-      }
+    /**
+     * @param ProductElementInterface[] $products
+     */
+    public function addProducts(array $products): FeedElementInterface
+    {
+        foreach ($products as $product) {
+            $this->addProduct($product);
+        }
+        return $this;
     }
 
-    return $element;
-  }
+    /**
+     * @param BrandElementInterface[] $brands
+     */
+    public function addBrands(array $brands): FeedElementInterface
+    {
+        foreach ($brands as $brand) {
+            $this->addBrand($brand);
+        }
+        return $this;
+    }
 
+    /**
+     * @param CategoryElementInterface[] $categories
+     */
+    public function addCategories(array $categories): FeedElementInterface
+    {
+        foreach ($categories as $category) {
+            $this->addCategory($category);
+        }
+        return $this;
+    }
+
+    public function generateXMLArray(): array
+    {
+        $element = [
+            '#attributes' => [
+                'xmlns' => 'http://www.bazaarvoice.com/xs/PRR/ProductFeed/'.self::$apiVersion,
+                'name' => $this->name,
+                'incremental' => $this->incremental ? 'true' : 'false',
+                'extractDate' => date('Y-m-d').'T'.date('H:i:s'),
+            ],
+        ];
+
+        if ($brands = $this->generateBrandsXMLArray()) {
+            $element['#children'][] = $brands;
+        }
+
+        if ($categories = $this->generateCategoriesXMLArray()) {
+            $element['#children'][] = $categories;
+        }
+
+        if ($products = $this->generateProductsXMLArray()) {
+            $element['#children'][] = $products;
+        }
+
+        return $element;
+    }
+
+    private function generateBrandsXMLArray(): array
+    {
+        if (!count($this->brands)) {
+            return [];
+        }
+
+        $element = $this->generateElementXMLArray('Brands');
+        foreach ($this->brands as $brand) {
+            $element['#children'][] = $brand->generateXMLArray();
+        }
+
+        return $element;
+    }
+
+    private function generateCategoriesXMLArray(): array
+    {
+        if (!count($this->categories)) {
+            return [];
+        }
+
+        $element = $this->generateElementXMLArray('Categories');
+        foreach ($this->categories as $category) {
+            $element['#children'][] = $category->generateXMLArray();
+        }
+
+        return $element;
+    }
+
+    private function generateProductsXMLArray(): array
+    {
+        if (!count($this->products)) {
+            return [];
+        }
+
+        $element = $this->generateElementXMLArray('Products');
+        foreach ($this->products as $product) {
+            $element['#children'][] = $product->generateXMLArray();
+        }
+
+        return $element;
+    }
 }

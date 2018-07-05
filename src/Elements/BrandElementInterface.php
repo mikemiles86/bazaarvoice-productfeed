@@ -1,11 +1,6 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
-
-/**
- * Interface BrandElementInterface
- * @package BazaarvoiceProductFeed\Elements
- */
-interface BrandElementInterface extends ElementInterface {
-
+interface BrandElementInterface extends ElementInterface
+{
 }
