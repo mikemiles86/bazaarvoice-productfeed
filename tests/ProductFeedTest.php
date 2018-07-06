@@ -1,12 +1,13 @@
 <?php
-namespace BazaarVoice\Tests;
+namespace Tests;
 
 use BazaarVoice\ProductFeed;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use org\bovigo\vfs\vfsStreamWrapper;
+use PHPUnit\Framework\TestCase;
 
-class ProductFeedTest extends \PHPUnit_Framework_TestCase {
+class ProductFeedTest extends TestCase {
 
   public function testNewFeedElement() {
     $pf = new ProductFeed();
