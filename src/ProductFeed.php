@@ -1,193 +1,156 @@
 <?php
+namespace BazaarVoice;
 
-namespace BazaarvoiceProductFeed;
-
-use BazaarvoiceProductFeed\Elements\BrandElement;
-use BazaarvoiceProductFeed\Elements\CategoryElement;
-use BazaarvoiceProductFeed\Elements\FeedElement;
-use BazaarvoiceProductFeed\Elements\FeedElementInterface;
-use BazaarvoiceProductFeed\Elements\ProductElement;
+use BazaarVoice\Elements\BrandElementInterface;
+use BazaarVoice\Elements\CategoryElementInterface;
+use BazaarVoice\Elements\ProductElementInterface;
+use Exception;
+use BazaarVoice\Elements\BrandElement;
+use BazaarVoice\Elements\CategoryElement;
+use BazaarVoice\Elements\FeedElement;
+use BazaarVoice\Elements\FeedElementInterface;
+use BazaarVoice\Elements\ProductElement;
 use phpseclib\Net\SFTP;
+use SimpleXMLElement;
 
-/**
- * Class ProductFeed
- * @package BazaarvoiceProductFeed
- */
-class ProductFeed implements ProductFeedInterface {
-
+class ProductFeed implements ProductFeedInterface
+{
   /**
    * @var bool
    */
-  protected $use_stage = FALSE;
+    protected $useStage = false;
 
-  public function __construct() {
-    return $this;
-  }
-
-  /**
-   * Set object to use staging (see: sendFeed()).
-   * @return $this
-   */
-  public function useStage() {
-    $this->use_stage = TRUE;
-    return $this;
-  }
-
-  /**
-   * Set object to use Production (see: sendFeed()).
-   * @return $this
-   */
-  public function useProduction() {
-    $this->use_stage = FALSE;
-    return $this;
-  }
-
-  public function newFeed($name, $incremental = FALSE) {
-    // Create a new FeedElement object.
-    return  new FeedElement($name, $incremental);
-  }
-
-  public function newProduct($external_id, $name, $category_id, $page_url, $image_url) {
-    // Return a new ProductElement object.
-    return new ProductElement($external_id, $name, $category_id, $page_url, $image_url);
-  }
-
-  public function newBrand($external_id, $name){
-    // Return a new BrandElement object.
-    return new BrandElement($external_id, $name);
-  }
-
-  public function newCategory($external_id, $name, $page_url) {
-    // Return a new CategoryElement object.
-    return new CategoryElement($external_id, $name, $page_url);
-  }
-
-  public function printFeed(FeedElementInterface $feed) {
-    $xml_string = FALSE;
-    // Generate XML object.
-    if ($xml = $this->generateFeedXML($feed)) {
-      // retrieve XML string.
-      $xml_string = $xml->asXML();
-      // Bazaarvoice does not like CDATA.
-      $xml_string = str_replace(array("<![CDATA[", "]]>"), "", $xml_string);
+    public function __construct()
+    {
+        return $this;
     }
-    // Return XML string.
-    return $xml_string;
-  }
 
-  public function saveFeed(FeedElementInterface $feed, $directory, $filename) {
-    $saved = FALSE;
-    // Get XML string of feed.
-    if ($feed_xml = $this->printFeed($feed)) {
-      // gzip file.
-      if ($file = gzencode($feed_xml)) {
-        // Cleanup directory string.
+    public function useStage(): self
+    {
+        $this->useStage = true;
+        return $this;
+    }
+
+    public function useProduction(): self
+    {
+        $this->useStage = false;
+        return $this;
+    }
+
+    public function newFeed(string $name, bool $incremental = false): FeedElementInterface
+    {
+        return new FeedElement($name, $incremental);
+    }
+
+    public function newProduct(string $externalId, string $name, string $categoryId, string $pageUrl, string $imageUrl): ProductElementInterface
+    {
+        return new ProductElement($externalId, $name, $categoryId, $pageUrl, $imageUrl);
+    }
+
+    public function newBrand(string $externalId, string $name): BrandElementInterface
+    {
+        return new BrandElement($externalId, $name);
+    }
+
+    public function newCategory(string $externalId, string $name, string $pageUrl): CategoryElementInterface
+    {
+        return new CategoryElement($externalId, $name, $pageUrl);
+    }
+
+    public function printFeed(FeedElementInterface $feed): string
+    {
+        $xmlString = false;
+
+        if ($xml = $this->generateFeedXML($feed)) {
+            $xmlString = $xml->asXML();
+            $xmlString = str_replace(['<![CDATA[', ']]>'], '', $xmlString);
+        }
+
+        return $xmlString;
+    }
+
+    public function saveFeed(FeedElementInterface $feed, string $directory, string $filename)
+    {
+        if (!$feedXml = $this->printFeed($feed)) {
+            return false;
+        }
+
+        if (!$file = gzencode($feedXml)) {
+            return false;
+        }
+
         $directory = rtrim($directory, '/\\');
-        // Does directory exists and is it writable?
-        if (is_dir($directory) && is_writable($directory)) {
-          // build filepath string.
-          $file_path = $directory . '/' . $filename . '.xml.gz';
-          // Attempt to save the contents.
-          if (file_put_contents($file_path, $file)) {
-            $saved = $file_path;
-          }
+        if (!is_dir($directory) || !is_writable($directory)) {
+            return false;
         }
-      }
+
+        $filePath = $directory.'/'.$filename.'.xml.gz';
+
+        if (file_put_contents($filePath, $file)) {
+            return $filePath;
+        }
+
+        return false;
     }
 
-    return $saved;
-  }
+    public function sendFeed(string $filePath, string $sftpUsername, string $sftpPassword, string $sftpDirectory = 'import-inbox', string $sftpPort = '22'): bool
+    {
+        $fileSent = false;
 
-  public function sendFeed($file_path, $sftp_username, $sftp_password, $sftp_directory = 'import-inbox', $sftp_port = '22') {
-    $file_sent = FALSE;
-    // Build host string, depending if using stage or not.
-    $sftp_host = 'sftp' . ($this->use_stage ? '-stg':'') . '.bazaarvoice.com';
-    // Get filename.
-    $filename = basename($file_path);
-    // Create a new SFTP object using host and port.
-    $sftp = new SFTP($sftp_host, $sftp_port);
-    // Remove any extraneous slashes.
-    $sftp_directory = rtrim($sftp_directory, '/');
-    $sftp_directory = ltrim($sftp_directory, '/');
+        $sftpHost = 'sftp'.($this->useStage ? '-stg':'').'.bazaarvoice.com';
 
-    try {
-      // Attempt to login with credentials.
-      if ($sftp->login($sftp_username, $sftp_password)) {
-        // Get full remote directory path.
-        $root_directory = $sftp->realpath(".");
-        $full_directory_path = $root_directory . ((substr($root_directory, -1) == '/') ? '' : '/') . $sftp_directory;
-        // Change to remote directory.
-        $sftp->chdir($full_directory_path);
-        // Attempt to upload the file contents.
-        if ($sftp->put($filename, file_get_contents($file_path, FALSE))) {
-          // Successful upload.
-          $file_sent = TRUE;
+        $filename = basename($filePath);
+
+        $sftp = new SFTP($sftpHost, $sftpPort);
+
+        $sftpDirectory = rtrim($sftpDirectory, '/');
+        $sftpDirectory = ltrim($sftpDirectory, '/');
+
+        try {
+            if ($sftp->login($sftpUsername, $sftpPassword)) {
+                $rootDirectory = $sftp->realpath('.');
+                $fullDirectoryPath = $rootDirectory.(('/' == substr($rootDirectory, -1)) ? '' : '/').$sftpDirectory;
+                $sftp->chdir($fullDirectoryPath);
+                if ($sftp->put($filename, file_get_contents($filePath, false))) {
+                    $fileSent = true;
+                }
+            }
+        } catch (Exception $e) {
+            $fileSent = $e->getMessage();
         }
-      }
-    }
-    // Capture what went wrong.
-    catch (\Exception $e) {
-      $file_sent = $e->getMessage();
+
+        return $fileSent;
     }
 
-
-    return $file_sent;
-  }
-
-  /**
-   * Generate and return a  SimpleXMLElement object for the product feed
-   *
-   * @param \BazaarvoiceProductFeed\Elements\FeedElementInterface $feed
-   *   Bazaarvoice FeedElement Object
-   *
-   * @return \SimpleXMLElement
-   *   Simple XML object
-   */
-  private function generateFeedXML(FeedElementInterface $feed) {
-    // Create a new SimpleXML element object.
-    $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><Feed></Feed>');
-    $feed_xml = $feed->generateXMLArray();
-    // Build XML string using FeedElement XML array.
-    $this->buildXML($xml, $feed_xml);
-    // return XML object.
-    return $xml;
-  }
-
-  /**
-   * Recursive function to build SimpleXMLElements.
-   *
-   * @param \SimpleXMLElement $xml
-   *   SimpleXML Object. Passed by reference.
-   * @param array $element
-   *   Product feed XML Element array to add to SimpleXML
-   */
-  private function buildXML(\SimpleXMLElement &$xml, array $element = []) {
-
-    // Is there an element to add?
-    if (!empty($element)) {
-      // By default set passed by reference element as xml element to manipulate.
-      $element_xml = $xml;
-      // Element have a #name?
-      if (isset($element['#name']) && !empty($element['#name'])) {
-        // Create new child on parent and change element_xml to child.
-        $element_xml = $element_xml->addChild($element['#name'], ($element['#value'] ?: null));
-      }
-
-      // Have attributes to add?
-      if (isset($element['#attributes']) && !empty($element['#attributes'])) {
-        // Add each attribute to the element_xml.
-        foreach ($element['#attributes'] as $attribute => $value) {
-          $element_xml->addAttribute($attribute, $value);
-        }
-      }
-
-      // Have element_xml and there are children?
-      if (isset($element['#children']) && !empty($element['#children'])) {
-        // Recursively add the child elements.
-        foreach ($element['#children'] as $child) {
-          $this->buildXML($element_xml, $child);
-        }
-      }
+    private function generateFeedXML(FeedElementInterface $feed)
+    {
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><Feed></Feed>');
+        $feedXml = $feed->generateXMLArray();
+        $this->buildXML($xml, $feedXml);
+        return $xml;
     }
-  }
+
+    private function buildXML(SimpleXMLElement &$xml, array $element = []): void
+    {
+        if (empty($element)) {
+            return;
+        }
+
+        $elementXml = $xml;
+        if (isset($element['#name']) && !empty($element['#name'])) {
+            $elementXml = $elementXml->addChild($element['#name'], ($element['#value'] ?? null));
+        }
+
+        if (isset($element['#attributes']) && !empty($element['#attributes'])) {
+            foreach ($element['#attributes'] as $attribute => $value) {
+                $elementXml->addAttribute($attribute, $value);
+            }
+        }
+
+        if (isset($element['#children']) && !empty($element['#children'])) {
+            foreach ($element['#children'] as $child) {
+                $this->buildXML($elementXml, $child);
+            }
+        }
+    }
 }

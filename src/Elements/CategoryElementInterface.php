@@ -1,71 +1,15 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
+interface CategoryElementInterface extends ElementInterface
+{
+    public function setPageUrl(string $url): CategoryElementInterface;
 
-/**
- * Interface CategoryElementInterface
- * @package BazaarvoiceProductFeed\Elements
- */
-interface CategoryElementInterface extends ElementInterface {
+    public function setParentId(string $parentId): CategoryElementInterface;
 
-  /**
-   * Sets the url string for the category page.
-   *
-   * @param string $url
-   *   Properly formatted url string.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\CategoryElementInterface
-   *  Expected to return the object instance.
-   */
-  public function setPageUrl($url);
+    public function setImageUrl(string $url): CategoryElementInterface;
 
-  /**
-   * Sets the unique ID of category parent. Must meet Bazaarvoice standards.
-   *
-   * @param string $parent_id
-   *   Unique id of category parent.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\CategoryElementInterface
-   *  Expected to return the object instance.
-   */
-  public function setParentId($parent_id);
+    public function addPageUrl(string $url, string $locale): CategoryElementInterface;
 
-  /**
-   * Sets the url of the image for the category.
-   *
-   * @param string $url
-   *   Properly formatted URL string.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\CategoryElementInterface
-   *  expected to return the object instance.
-   */
-  public function setImageUrl($url);
-
-  /**
-   * Add a locale specific page url variant.
-   *
-   * @param string $url
-   *   Properly formatted URL string.
-   *
-   * @param string $locale
-   *   Properly formatted Locale code (xx_YY)
-   *
-   * @return \BazaarvoiceProductFeed\Elements\CategoryElementInterface
-   *  expected to return the object instance.
-   */
-  public function addPageUrl($url, $locale);
-
-  /**
-   * Add a locale specific image url variant.
-   *
-   * @param string $url
-   *   Properly formatted URL string.
-   *
-   * @param string $locale
-   *   Properly formatted Locale code (xx_YY)
-   *
-   * @return \BazaarvoiceProductFeed\Elements\CategoryElementInterface
-   *  expected to return the object instance.
-   */
-  public function addImageUrl($url, $locale);
+    public function addImageUrl(string $url, string $locale): CategoryElementInterface;
 }
