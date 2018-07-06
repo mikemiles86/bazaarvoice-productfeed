@@ -1,8 +1,8 @@
 # Bazaarvoice Productfeed Library
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/mikemiles86/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/mikemiles86/bazaarvoice-productfeed)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/leroy-merlin-br/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/leroy-merlin-br/bazaarvoice-productfeed)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Total Downloads](https://img.shields.io/packagist/dt/mikemiles86/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/mikemiles86/bazaarvoice-productfeed)
+[![Total Downloads](https://img.shields.io/packagist/dt/leroy-merlin-br/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/leroy-merlin-br/bazaarvoice-productfeed)
 
 A PHP library for generating and sFTPing XML [Bazaarvoice ProductFeeds](http://labsbp-docsportal.aws.bazaarvoice.com/DataFeeds/Introduction/IntroductionDataFeeds_con.html).
 
