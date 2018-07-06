@@ -1,11 +1,11 @@
 {
-  "name": "mikemiles86/bazaarvoice-productfeed",
+  "name": "leroy-merlin-br/bazaarvoice-productfeed",
   "type": "library",
   "description": "A PHP library for generating Bazaarvoice XML ProductFeeds.",
   "keywords": [
     "bazaarvoice"
   ],
-  "homepage": "https://github.com/mikemiles86/bazaarvoice-productfeed",
+  "homepage": "https://github.com/leroy-merlin-br/bazaarvoice-productfeed",
   "license": "MIT",
   "authors": [{
     "name": "Michael Miles",
