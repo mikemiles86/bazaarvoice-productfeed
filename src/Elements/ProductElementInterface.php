@@ -13,7 +13,7 @@ interface ProductElementInterface extends ElementInterface
 
     public function setImageUrl(string $url): ProductElementInterface;
 
-    public function addName(string $name, string $locale): ProductElementInterface;
+    public function addName(string $name, string $locale);
 
     public function addPageUrl(string $url, string $locale): ProductElementInterface;
 
