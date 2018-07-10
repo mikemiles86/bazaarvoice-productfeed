@@ -12,7 +12,7 @@
     "email": "mikemiles86@gmail.com"
   }],
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.1",
     "phpseclib/phpseclib": "~2.0",
     "ext-simplexml": "*"
   },
