@@ -1,131 +1,96 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
-
-/**
- * Class CategoryElement
- * @package BazaarvoiceProductFeed\Elements
- */
-class CategoryElement extends ElementBase implements CategoryElementInterface {
+class CategoryElement extends ElementBase implements CategoryElementInterface
+{
+  /**
+   * @var string
+   */
+    protected $pageUrl;
 
   /**
    * @var string
    */
-  protected $page_url;
+    protected $imageUrl;
 
   /**
    * @var string
    */
-  protected $image_url;
-
-  /**
-   * @var string
-   */
-  protected $parent_id;
+    protected $parentId;
 
   /**
    * @var array
    */
-  protected $page_urls;
+    protected $pageUrls;
 
   /**
    * @var array
    */
-  protected $image_urls;
+    protected $imageUrls;
 
-  /**
-   * CategoryElement constructor.
-   *
-   * @param string $external_id
-   *    The unique ID formatted to meet Bazaarvoice standards.
-   *
-   * @param string $name
-   *   The category name.
-   *
-   * @param string $page_url
-   *   The url of the category page.
-   */
-  public function __construct($external_id, $name, $page_url) {
-    // See: ElementBase::setExternalId().
-    $this->setExternalId($external_id);
-    // See: ElementBase::setName().
-    $this->setName($name);
-    $this->setPageUrl($page_url);
-    return $this;
-  }
-
-  public function setParentId($parent_id) {
-    // See: ElementBase::checkValidExternalId().
-    if ($this->checkValidExternalId($parent_id)) {
-      $this->parent_id = $parent_id;
-    }
-    return $this;
-  }
-
-  public function setPageUrl($url) {
-    // See: ElementBase::checkValidUrl().
-    if ($this->checkValidUrl($url)) {
-      $this->page_url = $url;
-    }
-    return $this;
-  }
-
-  public function setImageUrl($url) {
-    // See ElementBase::checkValidUrl().
-    if ($this->checkValidUrl($url)) {
-      $this->image_url = $url;
-    }
-    return $this;
-  }
-
-  public function addPageUrl($url, $locale) {
-    // See ElementBase::checkValidUrl() and ElementBase::checkValidLocale().
-    if ($this->checkValidUrl($url) && $this->checkValidLocale($locale)) {
-      $this->page_urls[$locale] = $url;
-    }
-    return $this;
-  }
-
-  public function addImageUrl($url, $locale) {
-    // See ElementBase::checkValidUrl() and ElementBase::checkValidLocale().
-    if ($this->checkValidUrl($url) && $this->checkValidLocale($locale)) {
-      $this->image_urls[$locale] = $url;
-    }
-    return $this;
-  }
-
-  public function generateXMLArray() {
-    // Get base element array from parent.
-    $element = parent::generateXMLArray();
-    // Set name property
-    $element['#name'] = 'Category';
-    // Add child element for PageUrl.
-    $element['#children'][] = $this->generateElementXMLArray('CategoryPageUrl', $this->page_url);
-
-    // If have a parent category.
-    if ($this->parent_id) {
-      // Add child element for ParentExternalId.
-      $element['#children'][] = $this->generateElementXMLArray('ParentExternalId', $this->parent_id);
+    public function __construct(string $externalId, string $name, string $pageUrl)
+    {
+        $this->setExternalId($externalId);
+        $this->setName($name);
+        $this->setPageUrl($pageUrl);
+        return $this;
     }
 
-    // If have array of additional page urls.
-    if (!empty($this->page_urls)) {
-      // Add child element for Locale Page Urls.
-      $element['#children'][] = $this->generateLocaleElementsXMLArray('CategoryPageUrls', 'CategoryPageUrl', $this->page_urls);
+    public function setParentId(string $parentId): CategoryElementInterface
+    {
+        $this->parentId = $parentId;
+
+        return $this;
     }
 
-    // If have an image url
-    if ($this->image_url) {
-      // Add child element for image url.
-      $element['#children'][] = $this->generateElementXMLArray('ImageUrl', $this->image_url);
+    public function setPageUrl(string $url): CategoryElementInterface
+    {
+        $this->pageUrl = $url;
+        return $this;
     }
 
-    // If have array of additional locale images.
-    if (!empty($this->image_urls)) {
-      // Add child element for locale image urls.
-      $element['#children'][] = $this->generateLocaleElementsXMLArray('ImageUrls', 'ImageUrl', $this->image_urls);
+    public function setImageUrl(string $url): CategoryElementInterface
+    {
+        $this->imageUrl = $url;
+        return $this;
     }
 
-    return $element;
-  }
+    public function addPageUrl(string $url, string $locale): CategoryElementInterface
+    {
+        $this->pageUrls[$locale] = $url;
+        return $this;
+    }
+
+    public function addImageUrl(string $url, string $locale): CategoryElementInterface
+    {
+        $this->imageUrls[$locale] = $url;
+        return $this;
+    }
+
+    public function generateXMLArray(): array
+    {
+        $element = parent::generateXMLArray();
+
+        $element['#name'] = 'Category';
+
+        $element['#children'][] = $this->generateElementXMLArray('CategoryPageUrl', $this->pageUrl);
+
+        if ($this->parentId) {
+            $element['#children'][] = $this->generateElementXMLArray('ParentExternalId', $this->parentId);
+        }
+
+        if (!empty($this->pageUrls)) {
+            $element['#children'][] = $this->generateLocaleElementsXMLArray('CategoryPageUrls', 'CategoryPageUrl', $this->pageUrls);
+        }
+
+        if ($this->imageUrl) {
+            $element['#children'][] = $this->generateElementXMLArray('ImageUrl', $this->imageUrl);
+        }
+
+        if (!empty($this->imageUrls)) {
+            $element['#children'][] = $this->generateLocaleElementsXMLArray('ImageUrls', 'ImageUrl', $this->imageUrls);
+        }
+
+        return $element;
+    }
 }

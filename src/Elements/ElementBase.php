@@ -1,204 +1,137 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
+use ErrorException;
 
-/**
- * Class ElementBase
- * @package BazaarvoiceProductFeed\Elements
- */
-abstract class ElementBase implements ElementInterface {
+abstract class ElementBase implements ElementInterface
+{
+  /**
+   * @var string
+   */
+    protected $externalId;
 
   /**
    * @var string
    */
-  protected $external_id;
-
-  /**
-   * @var string
-   */
-  protected $name;
+    protected $name;
 
   /**
    * @var array
    */
-  protected $names;
+    protected $names;
 
   /**
    * @var bool
    */
-  protected $removed;
+    protected $removed;
 
-  public function getExternalId() {
-    return $this->external_id;
-  }
-
-  public function setRemoved($removed = TRUE) {
-    $this->removed = ($removed === TRUE ? TRUE:FALSE);
-    return $this;
-  }
-
-  public function setExternalId($external_id) {
-    if ($this->checkValidExternalId($external_id)) {
-      $this->external_id = $external_id;
-    }
-    return $this;
-  }
-
-  public function setName($name) {
-    // Confirm that name is a string value.
-    if (is_string($name)) {
-      $this->name = $name;
-    }
-    else throw new \ErrorException('Name must be a string.');
-
-    return $this;
-  }
-
-  public function addName($name, $locale) {
-    if ($this->checkValidLocale($locale)) {
-      // Add name to array keyed off of Locale to prevent duplicate locales.
-      $this->names[$locale] = $name;
-    }
-    return $this;
-  }
-
-  public function generateXMLArray() {
-    $element = [];
-
-    // If marked as a removed element, set removed property.
-    if ($this->removed) {
-      $element['#attributes']['removed'] = 'true';
+    public function getExternalId(): string
+    {
+        return $this->externalId;
     }
 
-    // If external id has been set.
-    if ($this->external_id) {
-      // Add child element for ExternalId.
-      $element['#children'][] = $this->generateElementXMLArray('ExternalId', $this->external_id);
+    public function setRemoved(bool $removed = true): ElementInterface
+    {
+        $this->removed = $removed;
+        return $this;
     }
 
-    // If name has been set.
-    if ($this->name) {
-      // Add child element for Name
-      $element['#children'][] = $this->generateElementXMLArray('Name', $this->name);
+    public function setExternalId(string $externalId): ElementInterface
+    {
+        $this->externalId = $externalId;
+        return $this;
     }
 
-    // If locale variants of Name have been added.
-    if (!empty($this->names)) {
-      // Add children elements for each locale name.
-      $element['#children'][] = $this->generateLocaleElementsXMLArray('Names', 'Name', $this->names);
+    public function setName(string $name): ElementInterface
+    {
+        $this->name = $name;
+        return $this;
     }
 
-    return $element;
-  }
+    public function addName(string $name, string $locale): ElementInterface
+    {
+        if ($this->checkValidLocale($locale)) {
+            $this->names[$locale] = $name;
+        }
 
-  public function generateElementXMLArray($name, $value = false, array $attributes = []) {
-    $element = [
-      '#name' => $name,
-    ];
-
-    // Value being passed? set value attribute.
-    if ($value !== false) {
-      $element['#value'] = htmlspecialchars($value);
+        return $this;
     }
 
-    // Additional XML attributes being passed? set attributes.
-    if (!empty($attributes)) {
-      $element['#attributes'] = $attributes;
+    public function generateXMLArray(): array
+    {
+        $element = [];
+
+        if ($this->removed) {
+            $element['#attributes']['removed'] = 'true';
+        }
+
+        if ($this->externalId) {
+            $element['#children'][] = $this->generateElementXMLArray('ExternalId', $this->externalId);
+        }
+
+        if ($this->name) {
+            $element['#children'][] = $this->generateElementXMLArray('Name', $this->name);
+        }
+
+        if (!empty($this->names)) {
+            $element['#children'][] = $this->generateLocaleElementsXMLArray('Names', 'Name', $this->names);
+        }
+
+        return $element;
     }
 
-    return $element;
-  }
+    public function generateElementXMLArray(string $name, ?string $value = '', array $attributes = []): array
+    {
+        $element = [
+            '#name' => $name,
+        ];
 
-  public function generateMultipleElementsXMLArray($multiple_name, $single_name, array $elements) {
-    $element = false;
+        if ($value) {
+            $element['#value'] = htmlspecialchars($value);
+        }
 
-    if (!empty($elements)) {
-      // Generate basic element array with just name of multiple.
-      $element = $this->generateElementXMLArray($multiple_name);
+        if (!empty($attributes)) {
+            $element['#attributes'] = $attributes;
+        }
 
-      // Add each passed element to multiple element as a child.
-      foreach ($elements as $value) {
-        $element['#children'][] = $this->generateElementXMLArray($single_name, $value);
-      }
+        return $element;
     }
 
-    return $element;
-  }
+    public function generateMultipleElementsXMLArray(string $multipleName, string $singleName, array $elements): array
+    {
+        if (empty($elements)) {
+            return [];
+        }
 
-  public function generateLocaleElementsXMLArray($multiple_name, $single_name, array $locale_elements) {
-    $element = false;
+        $element = $this->generateElementXMLArray($multipleName);
 
-    if (!empty($locale_elements)) {
-      // Generate basic element array with just name of multiple.
-      $element = $this->generateElementXMLArray($multiple_name);
-
-      // Add each passed element to multiple element as a child, passing locale attribute.
-      foreach ($locale_elements as $locale => $value) {
-        $element['#children'][] = $this->generateElementXMLArray($single_name, $element, ['locale' => $locale]);
-      }
+        foreach ($elements as $value) {
+            $element['#children'][] = $this->generateElementXMLArray($singleName, $value);
+        }
+        return $element;
     }
 
-    return $element;
-  }
+    public function generateLocaleElementsXMLArray(string $multipleName, string $singleName, array $localeElements): array
+    {
+        if (empty($localeElements)) {
+            return [];
+        }
 
-  /**
-   * Boolean check if Id is formatted correctly.
-   *
-   * @param string $external_id
-   *   The external id string to evaluate.
-   *
-   * @return bool
-   *   Boolean TRUE or FALSE if properly formatted string.
-   *
-   * @throws \ErrorException
-   */
-  public function checkValidExternalId($external_id) {
-    // ID should be a string, and can only contain alphanumeric, asterisk(*), hyphens)-) and unserscores (_).
-    if (is_string($external_id) && preg_match('/^[[:alnum:]|\*|\-|\.|\_]+$/', $external_id)) {
-      return TRUE;
-    }
-    // Invalid Id so throw error.
-    else throw new \ErrorException('Invalid Id. May only contain only alphanumeric characters, asterisk (*), hyphen (-), period (.), or
-underscore (_)');
-  }
+        $element = $this->generateElementXMLArray($multipleName);
 
-  /**
-   * Boolean check if string is a valid url.
-   *
-   * @param string $url
-   *   The url string to evaluate.
-   *
-   * @return bool
-   *   Boolean TRUE or FALSE if valid or not.
-   *
-   * @throws \ErrorException
-   */
-  public function checkValidUrl($url) {
-    // Use php filter_var with validate url flag, and must be absolute.
-    if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
-      return TRUE;
-    }
-    // Invalid url so throw an exception.
-    else throw new \ErrorException('Invalid URL.');
-  }
+        foreach ($localeElements as $locale => $value) {
+            $element['#children'][] = $this->generateElementXMLArray($singleName, $element, ['locale' => $locale]);
+        }
 
-  /**
-   * Boolean check if string is a valid locale code.
-   *
-   * @param string $locale
-   *   Locale string to check.
-   *
-   * @return bool
-   *   Boolean TRUE or FALSE if valid or note.
-   *
-   * @throws \ErrorException
-   */
-  public function checkValidLocale($locale) {
-    // Must be a string and must match the format of xx_YY.
-    if (is_string($locale) && preg_match('/^[a-z]{2}\_[A-Z]{2}$/', $locale)) {
-      return TRUE;
+        return $element;
     }
-    // Invalid locale string so throw error.
-    else throw new \ErrorException('Invalid Locale code. Must match format of "xx_YY"');
-  }
+
+    public function checkValidLocale(string $locale): bool
+    {
+        if (preg_match('/^[a-z]{2}\_[A-Z]{2}$/', $locale)) {
+            return true;
+        }
+
+        throw new ErrorException('Invalid Locale code. Must match format of "xx_YY"');
+    }
 }

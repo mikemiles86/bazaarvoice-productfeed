@@ -1,8 +1,8 @@
 # Bazaarvoice Productfeed Library
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/mikemiles86/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/mikemiles86/bazaarvoice-productfeed)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/leroy-merlin-br/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/leroy-merlin-br/bazaarvoice-productfeed)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Total Downloads](https://img.shields.io/packagist/dt/mikemiles86/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/mikemiles86/bazaarvoice-productfeed)
+[![Total Downloads](https://img.shields.io/packagist/dt/leroy-merlin-br/bazaarvoice-productfeed.svg?style=flat-square)](https://packagist.org/packages/leroy-merlin-br/bazaarvoice-productfeed)
 
 A PHP library for generating and sFTPing XML [Bazaarvoice ProductFeeds](http://labsbp-docsportal.aws.bazaarvoice.com/DataFeeds/Introduction/IntroductionDataFeeds_con.html).
 
@@ -11,141 +11,141 @@ A PHP library for generating and sFTPing XML [Bazaarvoice ProductFeeds](http://l
 Via Composer
 
 ``` bash
-$ composer require mikemiles86/bazaarvoice-productfeed
+$ composer require leroy-merlin-br/bazaarvoice-productfeed
 ```
 
 ## Usage
 
 ### Creating a Feed.
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
+$productFeed = new \BazaarVoice\ProductFeed();
 ```
 
 ### Creating a feedElement
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 ```
 
 ### Creating an Incremental feed.
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed', TRUE);
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed', true);
 ```
 
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed')
-  ->setIncremental(TRUE);
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed')
+  ->setIncremental(true);
 ```
 
 
 ### Creating products and adding them to a feed.
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
-$product_element = $productFeed->newProduct('my_product', 'My Product', 'product_category_123', 'htttp://www.example.com/my-product', 'http://www.example.com/images/my-product.jpg');
-$feed_element->addProduct($product_element);
+$productElement = $productFeed->newProduct('my_product', 'My Product', 'product_category_123', 'htttp://www.example.com/my-product', 'http://www.example.com/images/my-product.jpg');
+$feedElement->addProduct($product_element);
 
-$more_products = [];
+$moreProducts = [];
 
-$second_product = $productFeed->newProduct('second_product', 'Second Product', 'product_category_456', 'htttp://www.example.com/second-product', 'http://www.example.com/images/second-product.jpg');
+$secondProduct = $productFeed->newProduct('second_product', 'Second Product', 'product_category_456', 'htttp://www.example.com/second-product', 'http://www.example.com/images/second-product.jpg');
   ->setDescription('This is my second product')
   ->addPageUrl('http://www.example.es/second-product', 'es_SP')
   ->setBrandId('my_brand_123')
   ->addUPC('012345');
   
-$more_products[] = $second_product;
+$moreProducts[] = $secondProduct;
 
-$more_products[] = $productFeed->newProduct('third_product', 'Third Product', 'product_category_789', 'htttp://www.example.com/third-product', 'http://www.example.com/images/third-product.jpg')
+$moreProducts[] = $productFeed->newProduct('third_product', 'Third Product', 'product_category_789', 'htttp://www.example.com/third-product', 'http://www.example.com/images/third-product.jpg')
   ->addISBN('123-456-7890')
   ->addPageUrl('http://www.example.co.uk/third-product', 'en_UK')
   ->addCustomAttribute('PRODUCT_FAMILY', 'example_products');
 
-$feed_element->addProducts($more_products);
+$feedElement->addProducts($moreProducts);
 
 ```
 
 ### Creating categories and adding them to a feed.
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ...
 
-$category_element = $productFeed->newCategory('my_category', 'My Category', 'htttp://www.example.com/my-product');
-$feed_element->addCategory($category_element);
+$categoryElement = $productFeed->newCategory('my_category', 'My Category', 'htttp://www.example.com/my-product');
+$feedElement->addCategory($categoryElement);
 
-$more_categories = [];
+$moreCategories = [];
 
-$second_category = $productFeed->newCategory('second_category', 'Second Category', 'http://www.example.com/second-category')
+$secondCategory = $productFeed->newCategory('second_category', 'Second Category', 'http://www.example.com/second-category')
   ->setImageUrl('http://www.example.com/images/second-category.jpg')
   ->addImageUrl('http://www.example.co.uk/images/uk-second-category.jpg', 'en_UK')
   ->setParentId('parent_category_id');
 
-$more_categories[] = $second_category;
+$moreCategories[] = $secondCategory;
 
-$feed_element->addCategories($more_categories);
+$feedElement->addCategories($moreCategories);
 
 ```
 
 ### Creating brands and adding them to a feed.
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ...
 
-$brand_element = $productFeed->newBrand('my_brand', 'My Brand');
-$feed_element->addBrand($brand_element);
+$brandElement = $productFeed->newBrand('my_brand', 'My Brand');
+$feedElement->addBrand($brandElement);
 
-$more_brands = [];
+$moreBrands = [];
 
-$second_brand = $productFeed->newBrand('second_brand', 'Second Brand')
+$secondBrand = $productFeed->newBrand('second_brand', 'Second Brand')
   ->addName('Duo Brand', 'es_SP')
   ->addName('Brand the Second', 'en_UK');
 
-$more_brands[] = $second_brand;
+$moreBrands[] = $secondBrand;
 
-$more_brands[] = $productFeed->newBrand('third_brand', 'Third Brand');
+$moreBrands[] = $productFeed->newBrand('third_brand', 'Third Brand');
 
-$feed_element->addBrands($more_brands);
+$feedElement->addBrands($moreBrands);
 
 ```
 
 ### Print ProductFeed XML string
 ``` php
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ... add products, brands & categories ...
 
-print $productFeed->printFeed($feed_element);
+print $productFeed->printFeed($feedElement);
 ```
 
 ### Saving Productfeed as an XML file.
 ``` php
 
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ... add products, brands & categories ...
 
-$productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ');
+$productFeed->saveFeed($feedElement, 'path/to/dir', 'my_feed_XYZ');
 ```
 
-### SFTP ProductFeed to Bazaarvoice Production.
+### SFTP ProductFeed to BazaarVoice Production.
 ``` php
 
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ... add products, brands & categories ...
 
-if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ') {  
+if ($feedFile = $productFeed->saveFeed($feedElement, 'path/to/dir', 'my_feed_XYZ') {  
   try {
-    $productFeed->sendFeed($feed_file, $sftp_username, $sftp_password);
+    $productFeed->sendFeed($feedFile, $sftpUsername, $sftpPassword);
   } catch (\Exception $e) {
     // Failed to FTP feed file.
   }
@@ -156,14 +156,14 @@ if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_X
 #### SFTP ProductFeed to Bazaarvoice Staging.
 ``` php
 
-$productFeed = new \BazaarvoiceProductFeed\ProductFeed();
-$feed_element = $productFeed->newFeed('my_feed');
+$productFeed = new \BazaarVoice\ProductFeed();
+$feedElement = $productFeed->newFeed('my_feed');
 
 // ... add products, brands & categories ...
 
-if ($feed_file = $productFeed->saveFeed($feed_element, 'path/to/dir', 'my_feed_XYZ') {  
+if ($feedFile = $productFeed->saveFeed($feedElement, 'path/to/dir', 'my_feed_XYZ') {  
   try {
-    $productFeed->useStage()->sendFeed($feed_file, $sftp_username, $sftp_password);
+    $productFeed->useStage()->sendFeed($feedFile, $sftpUsername, $sftpPassword);
   } catch (\Exception $e) {
     // Failed to FTP feed file.
   }

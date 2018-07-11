@@ -1,54 +1,17 @@
 <?php
+namespace BazaarVoice\Elements;
 
-namespace BazaarvoiceProductFeed\Elements;
+interface ElementInterface
+{
+    public function getExternalId(): string;
 
-/**
- * Interface ElementInterface
- * @package BazaarvoiceProductFeed\Elements
- */
-interface ElementInterface {
+    public function setExternalId(string $externalId): ElementInterface;
 
-  /**
-   * Return the external ID string for element.
-   *
-   * @return string
-   */
-  public function getExternalId();
+    public function setName(string $name): ElementInterface;
 
-  /**
-   * Sets the external ID string for element.
-   *
-   * @param string $external_id
-   *   string to be used as external id.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\ElementInterface
-   *  Expected to return this current instance of element.
-   */
-  public function setExternalId($external_id);
+    public function setRemoved(bool $removed = true): ElementInterface;
 
-  /**
-   * Set the name value of an element.
-   *
-   * @param string $name
-   *   String to be used as the name.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\ElementInterface
-   *  Expected to return this current instance of element.
-   */
-  public function setName($name);
-
-  /**
-   * Set the removed status of the element.
-   *
-   * @param bool $removed
-   *   Boolean TRUE or FALSE is element is to be remvoed or not.
-   *
-   * @return \BazaarvoiceProductFeed\Elements\ElementInterface
-   *  Expected to return this current instance of element.
-   */
-  public function setRemoved($removed = TRUE);
-
-  /**
+    /**
    * Creates an array for the element that can be used to build an XML document.
    *
    * @return array
@@ -59,18 +22,18 @@ interface ElementInterface {
    *   - #attributes : key/value array of XML attributes for element.
    *   - #children : array of child element arrays.
    */
-  public function generateXMLArray();
+    public function generateXMLArray(): array;
 
-  /**
+    /**
    * Builds array for specific XML element.
    *
-   * @param string $name
+   * @param string     $name
    *   Element name.
    *
    * @param bool|mixed $value
    *   (optional) element value.
    *
-   * @param array $attributes
+   * @param array      $attributes
    *   (optional) Array of XML attributes.
    *
    * @return array
@@ -81,18 +44,18 @@ interface ElementInterface {
    *   - #attributes : key/value array of XML attributes for element.
    *   - #children : array of child element arrays.
    */
-  public function generateElementXMLArray($name, $value = FALSE, array $attributes = []);
+    public function generateElementXMLArray(string $name, ?string $value, array $attributes = []): array;
 
-  /**
+    /**
    * Builds array for an XML element that represents multiple values.
    *
-   * @param string $multiple_name
-   *   Name of plural element.
+   * @param string $multipleName
+     *   Name of plural element.
    *
-   * @param string $single_name
+   * @param string $singleName
    *   Name of single element.
    *
-   * @param array $elements
+   * @param array  $elements
    *   array of values to add as single elements to multiple element.
    *
    *  Key/value array to represent element for XML generation.
@@ -101,19 +64,21 @@ interface ElementInterface {
    *   - #children : array of child elements containing
    *        - #name :  single element name
    *        - #value : element value.
+   *
+   *  @return array
    */
-  public function generateMultipleElementsXMLArray($multiple_name, $single_name, array $elements);
+    public function generateMultipleElementsXMLArray(string $multipleName, string $singleName, array $elements): array;
 
-  /**
+    /**
    * Builds array for an XML element that represents locale varaints of an element.
    *
-   * @param string $multiple_name
+   * @param string $multipleName
    *   Name of plural element.
    *
-   * @param string $single_name
+   * @param string $singleName
    *   Name of single element.
    *
-   * @param array $locale_elements
+   * @param array  $localeElements
    *   Key/value array of elements to create.
    *    - locale_code => value.
    *
@@ -125,6 +90,8 @@ interface ElementInterface {
    *        - #value : element value.
    *        - #attributes : array with locale key
    *            - locale => (locale_string)
+   *
+   * @return array
    */
-  public function generateLocaleElementsXMLArray($multiple_name, $single_name, array $locale_elements);
+    public function generateLocaleElementsXMLArray(string $multipleName, string $singleName, array $localeElements): array;
 }
