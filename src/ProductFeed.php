@@ -20,6 +20,8 @@ class ProductFeed implements ProductFeedInterface
    */
     protected $useStage = false;
 
+    protected $baseHost = 'sftp';
+
     public function __construct()
     {
         return $this;
@@ -96,12 +98,10 @@ class ProductFeed implements ProductFeedInterface
     public function sendFeed(string $filePath, string $sftpUsername, string $sftpPassword, string $sftpDirectory = 'import-inbox', string $sftpPort = '22'): bool
     {
         $fileSent = false;
-
-        $sftpHost = 'sftp'.($this->useStage ? '-stg':'').'.bazaarvoice.com';
-
+        
         $filename = basename($filePath);
 
-        $sftp = new SFTP($sftpHost, $sftpPort);
+        $sftp = new SFTP($this->getHost(), $sftpPort);
 
         $sftpDirectory = rtrim($sftpDirectory, '/');
         $sftpDirectory = ltrim($sftpDirectory, '/');
@@ -120,6 +120,23 @@ class ProductFeed implements ProductFeedInterface
         }
 
         return $fileSent;
+    }
+
+    public function getHost()
+    {
+        $sftpHost = $this->baseHost;
+
+        if ($this->useStage) {
+            $sftpHost .= '-stg';
+        }
+
+        return $sftpHost.'.bazaarvoice.com';
+    }
+
+    public function setBaseHost(string $baseHost)
+    {
+        $this->baseHost = $baseHost;
+        return $this;
     }
 
     private function generateFeedXML(FeedElementInterface $feed)
