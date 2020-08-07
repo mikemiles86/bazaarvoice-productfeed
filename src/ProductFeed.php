@@ -170,7 +170,7 @@ class ProductFeed implements ProductFeedInterface {
       // Element have a #name?
       if (isset($element['#name']) && !empty($element['#name'])) {
         // Create new child on parent and change element_xml to child.
-        $element_xml = $element_xml->addChild($element['#name'], ($element['#value'] ?: null));
+        $element_xml = $element_xml->addChild($element['#name'], ($element['#value'] ?? null));
       }
 
       // Have attributes to add?
