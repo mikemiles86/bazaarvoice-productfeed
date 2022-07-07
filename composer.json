@@ -14,8 +14,7 @@
   "require": {
     "php": ">=5.5",
     "phpseclib/phpseclib": "~2.0",
-    "ext-simplexml": "*",
-    "ext-ssh2": "*"
+    "ext-simplexml": "*"
   },
   "require-dev": {
     "ext-curl": "*",
