@@ -175,7 +175,7 @@ underscore (_)');
    */
   public function checkValidUrl($url) {
     // Use php filter_var with validate url flag, and must be absolute.
-    if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_HOST_REQUIRED)) {
+    if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL)) {
       return TRUE;
     }
     // Invalid url so throw an exception.
